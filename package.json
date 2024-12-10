@@ -1,5 +1,5 @@
 {
-  "name": "battleships",
+  "name": "battleship",
   "version": "1.0.0",
   "description": "Multiplayer Battleship Game",
   "main": "server.js",
