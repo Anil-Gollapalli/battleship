@@ -9,15 +9,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Anil-Gollapalli/battleship"
+    "url": "https://github.com/Anil-Gollapalli/battleship.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Anil Gollapalli",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/kubowania/battleships/issues"
+    "url": "https://github.com/Anil-Gollapalli/battleship/issues"
   },
-  "homepage": "https://github.com/kubowania/battleships#readme",
+  "homepage": "https://github.com/Anil-Gollapalli/battleship#readme",
   "dependencies": {
     "express": "^4.17.1",
     "socket.io": "^2.3.0"
