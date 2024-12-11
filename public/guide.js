@@ -9,5 +9,5 @@ function closeDialog() {
 }
 
 function callExit(){
-    window.location.href = 'http://localhost:3000/index.html';
+    window.location.href = 'https://anil-gollapalli.github.io/battleship/public/index.html';
 }
