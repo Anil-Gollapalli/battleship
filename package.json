@@ -4,14 +4,14 @@
   "description": "Multiplayer Battleship Game",
   "main": "server.js",
   "scripts": {
-    "start": "node server",
-    "dev": "nodemon server"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/Anil-Gollapalli/battleship.git"
   },
-  "keywords": [],
+  "keywords": ["battleship", "singleiplayer", "game"],
   "author": "Anil Gollapalli",
   "license": "ISC",
   "bugs": {
@@ -20,9 +20,9 @@
   "homepage": "https://github.com/Anil-Gollapalli/battleship#readme",
   "dependencies": {
     "express": "^4.21.2",
-    "socket.io": "^2.3.0"
+    "socket.io": "^4.6.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.4"
+    "nodemon": "^2.0.22"
   }
 }
