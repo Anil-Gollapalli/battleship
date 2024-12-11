@@ -62,21 +62,21 @@ document.addEventListener('DOMContentLoaded', () => {
       ]
     },
   ]
-
+ 
   createBoard(userGrid, userSquares)
   createBoard(computerGrid, computerSquares)
-
+ 
   // Select Player Mode
   if (gameMode === 'singlePlayer') {
     startSinglePlayer()
   } else {
     startMultiPlayer()
   }
-
+ 
   // Multiplayer
   function startMultiPlayer() {
     const socket = io();
-
+ 
     // Get your player number
     socket.on('player-number', num => {
       if (num === -1) {
@@ -84,20 +84,20 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         playerNum = parseInt(num)
         if(playerNum === 1) currentPlayer = "enemy"
-
+ 
         console.log(playerNum)
-
+ 
         // Get other player status
         socket.emit('check-players')
       }
     })
-
+ 
     // Another player has connected or disconnected
     socket.on('player-connection', num => {
       console.log(`Player number ${num} has connected or disconnected`)
       playerConnectedOrDisconnected(num)
     })
-
+ 
     // On enemy ready
     socket.on('enemy-ready', num => {
       enemyReady = true
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupButtons.style.display = 'none'
       }
     })
-
+ 
     // Check player status
     socket.on('check-players', players => {
       players.forEach((p, i) => {
@@ -118,18 +118,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       })
     })
-
+ 
     // On Timeout
     socket.on('timeout', () => {
       infoDisplay.innerHTML = 'You have reached the 10 minute limit'
     })
-
+ 
     // Ready button click
     startButton.addEventListener('click', () => {
       if(allShipsPlaced) playGameMulti(socket)
       else infoDisplay.innerHTML = "Please place all ships"
     })
-
+ 
     // Setup event listeners for firing
     computerSquares.forEach(square => {
       square.addEventListener('click', () => {
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       })
     })
-
+ 
     // On Fire Received
     socket.on('fire', id => {
       enemyGo(id)
@@ -147,35 +147,44 @@ document.addEventListener('DOMContentLoaded', () => {
       socket.emit('fire-reply', square.classList)
       playGameMulti(socket)
     })
-
+ 
     // On Fire Reply Received
     socket.on('fire-reply', classList => {
       revealSquare(classList)
       playGameMulti(socket)
     })
-
+ 
     function playerConnectedOrDisconnected(num) {
       let player = `.p${parseInt(num) + 1}`
       document.querySelector(`${player} .connected`).classList.toggle('active')
       if(parseInt(num) === playerNum) document.querySelector(player).style.fontWeight = 'bold'
     }
   }
-
-  // Single Player
-  function startSinglePlayer() {
-    showDialog();
-    generate(shipArray[0])
-    generate(shipArray[1])
-    generate(shipArray[2])
-    generate(shipArray[3])
-    generate(shipArray[4])
-
-    startButton.addEventListener('click', () => {
-      setupButtons.style.display = 'none'
-      playGameSingle()
-    })
-  }
-
+ 
+// Single Player
+function startSinglePlayer() {
+  showDialog();
+ 
+  // Automatically generate ships for the computer
+  generate(shipArray[0]);
+  generate(shipArray[1]);
+  generate(shipArray[2]);
+  generate(shipArray[3]);
+  generate(shipArray[4]);
+ 
+  // Event listener for the Start button
+  startButton.addEventListener('click', () => {
+    // Check if all ships are placed before starting the game
+    if (allShipsPlaced) {
+      infoDisplay.innerHTML = ""; // Hide the message
+      setupButtons.style.display = 'none';
+      playGameSingle();
+    } else {
+      infoDisplay.innerHTML = "Please place all ships on the grid.";
+    }
+  });
+ 
+}
   //Create Board
   function createBoard(grid, squares) {
     for (let i = 0; i < width*width; i++) {
@@ -185,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
       squares.push(square)
     }
   }
-
+ 
   //Draw the computers ships in random locations
   function generate(ship) {
     let randomDirection = Math.floor(Math.random() * ship.directions.length)
@@ -193,17 +202,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (randomDirection === 0) direction = 1
     if (randomDirection === 1) direction = 10
     let randomStart = Math.abs(Math.floor(Math.random() * computerSquares.length - (ship.directions[0].length * direction)))
-
+ 
     const isTaken = current.some(index => computerSquares[randomStart + index].classList.contains('taken'))
     const isAtRightEdge = current.some(index => (randomStart + index) % width === width - 1)
     const isAtLeftEdge = current.some(index => (randomStart + index) % width === 0)
-
+ 
     if (!isTaken && !isAtRightEdge && !isAtLeftEdge) current.forEach(index => computerSquares[randomStart + index].classList.add('taken', ship.name))
-
+ 
     else generate(ship)
   }
-  
-
+ 
+ 
   //Rotate the ships
   function rotate() {
     if (isHorizontal) {
@@ -228,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   rotateButton.addEventListener('click', rotate)
-
+ 
   //move around user ship
   ships.forEach(ship => ship.addEventListener('dragstart', dragStart))
   userSquares.forEach(square => square.addEventListener('dragstart', dragStart))
@@ -237,34 +246,34 @@ document.addEventListener('DOMContentLoaded', () => {
   userSquares.forEach(square => square.addEventListener('dragleave', dragLeave))
   userSquares.forEach(square => square.addEventListener('drop', dragDrop))
   userSquares.forEach(square => square.addEventListener('dragend', dragEnd))
-
+ 
   let selectedShipNameWithIndex
   let draggedShip
   let draggedShipLength
-
+ 
   ships.forEach(ship => ship.addEventListener('mousedown', (e) => {
     selectedShipNameWithIndex = e.target.id
     // console.log(selectedShipNameWithIndex)
   }))
-
+ 
   function dragStart() {
     draggedShip = this
     draggedShipLength = this.childNodes.length
     // console.log(draggedShip)
   }
-
+ 
   function dragOver(e) {
     e.preventDefault()
   }
-
+ 
   function dragEnter(e) {
     e.preventDefault()
   }
-
+ 
   function dragLeave() {
     // console.log('drag leave')
   }
-
+ 
   function dragDrop() {
     let shipNameWithLastId = draggedShip.lastChild.id
     let shipClass = shipNameWithLastId.slice(0, -2)
@@ -274,15 +283,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // console.log(shipLastId)
     const notAllowedHorizontal = [0,10,20,30,40,50,60,70,80,90,1,11,21,31,41,51,61,71,81,91,2,22,32,42,52,62,72,82,92,3,13,23,33,43,53,63,73,83,93]
     const notAllowedVertical = [99,98,97,96,95,94,93,92,91,90,89,88,87,86,85,84,83,82,81,80,79,78,77,76,75,74,73,72,71,70,69,68,67,66,65,64,63,62,61,60]
-    
+   
     let newNotAllowedHorizontal = notAllowedHorizontal.splice(0, 10 * lastShipIndex)
     let newNotAllowedVertical = notAllowedVertical.splice(0, 10 * lastShipIndex)
-
+ 
     selectedShipIndex = parseInt(selectedShipNameWithIndex.substr(-1))
-
+ 
     shipLastId = shipLastId - selectedShipIndex
     // console.log(shipLastId)
-
+ 
     if (isHorizontal && !newNotAllowedHorizontal.includes(shipLastId)) {
       for (let i=0; i < draggedShipLength; i++) {
         let directionClass
@@ -300,15 +309,15 @@ document.addEventListener('DOMContentLoaded', () => {
         userSquares[parseInt(this.dataset.id) - selectedShipIndex + width*i].classList.add('taken', 'vertical', directionClass, shipClass)
       }
     } else return
-
+ 
     displayGrid.removeChild(draggedShip)
     if(!displayGrid.querySelector('.ship')) allShipsPlaced = true
   }
-
+ 
   function dragEnd() {
     // console.log('dragend')
   }
-
+ 
   // Game Logic for MultiPlayer
   function playGameMulti(socket) {
     setupButtons.style.display = 'none'
@@ -318,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ready = true
       playerReady(playerNum)
     }
-
+ 
     if(enemyReady) {
       if(currentPlayer === 'user') {
         turnDisplay.innerHTML = 'Your Go'
@@ -328,14 +337,15 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   }
-
+ 
   function playerReady(num) {
     let player = `.p${parseInt(num) + 1}`
     document.querySelector(`${player} .ready`).classList.toggle('active')
   }
-
+ 
   // Game Logic for Single Player
   function playGameSingle() {
+   
     if (isGameOver) return
     if (currentPlayer === 'user') {
       turnDisplay.innerHTML = 'Your Go'
@@ -349,13 +359,13 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(enemyGo, 1000)
     }
   }
-
+ 
   let destroyerCount = 0
   let submarineCount = 0
   let cruiserCount = 0
   let battleshipCount = 0
   let carrierCount = 0
-
+ 
   function revealSquare(classList) {
     const enemySquare = computerGrid.querySelector(`div[data-id='${shotFired}']`)
     const obj = Object.values(classList)
@@ -375,14 +385,14 @@ document.addEventListener('DOMContentLoaded', () => {
     currentPlayer = 'enemy'
     if(gameMode === 'singlePlayer') playGameSingle()
   }
-
+ 
   let cpuDestroyerCount = 0
   let cpuSubmarineCount = 0
   let cpuCruiserCount = 0
   let cpuBattleshipCount = 0
   let cpuCarrierCount = 0
-
-
+ 
+ 
   function enemyGo(square) {
     if (gameMode === 'singlePlayer') square = Math.floor(Math.random() * userSquares.length)
     if (!userSquares[square].classList.contains('boom')) {
@@ -398,7 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
     currentPlayer = 'user'
     turnDisplay.innerHTML = 'Your Go'
   }
-
+ 
   function checkForWins() {
     let enemy = 'computer'
     if(gameMode === 'multiPlayer') enemy = 'enemy'
@@ -442,7 +452,7 @@ document.addEventListener('DOMContentLoaded', () => {
       infoDisplay.innerHTML = `${enemy} sunk your carrier`
       cpuCarrierCount = 10
     }
-
+ 
     if ((destroyerCount + submarineCount + cruiserCount + battleshipCount + carrierCount) === 50) {
       infoDisplay.innerHTML = "YOU WIN"
       gameOver()
@@ -452,9 +462,10 @@ document.addEventListener('DOMContentLoaded', () => {
       gameOver()
     }
   }
-
+ 
   function gameOver() {
     isGameOver = true
     startButton.removeEventListener('click', playGameSingle)
   }
 })
+ 
